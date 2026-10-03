@@ -1,945 +1,370 @@
+```html
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>סַבָּא - מאמן היגוי אישי לשורקות (ש, ס, ז)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>סְפִּיקִי - מאמן הגייה אישי לשורקות (ש, ס, ז)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Heebo:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&family=Heebo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
   
   <style>
     body {
       font-family: 'Rubik', 'Heebo', sans-serif;
-      background: radial-gradient(circle at top right, #f8fafc, #eff6ff 60%, #e0e7ff 100%);
+      background: radial-gradient(circle at 10% 10%, #f1f5f9 0%, #e0e7ff 50%, #eff6ff 100%);
       min-height: 100vh;
     }
-    
-    .pulse-ring {
-      animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+
+    /* Soft pulse for active state */
+    @keyframes subtle-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.9; }
+      50% { transform: scale(1.08); opacity: 0.4; }
     }
-    
-    @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.8; }
-      50% { transform: scale(1.12); opacity: 0.3; }
-      100% { transform: scale(0.95); opacity: 0.8; }
+    .pulse-glow {
+      animation: subtle-pulse 2.2s infinite ease-in-out;
     }
 
-    .eye-blink {
-      transform-origin: center;
-      animation: blink 4s infinite;
-    }
-
+    /* Eye blink */
     @keyframes blink {
       0%, 96%, 100% { transform: scaleY(1); }
       98% { transform: scaleY(0.08); }
     }
-
-    .float-avatar {
-      animation: gentle-float 4.5s ease-in-out infinite alternate;
+    .eye-blink {
+      transform-origin: 50% 50%;
+      animation: blink 4.2s infinite;
     }
 
-    @keyframes gentle-float {
+    /* Floating character */
+    @keyframes gentle-bob {
       0% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-7px) rotate(0.8deg); }
-      100% { transform: translateY(3px) rotate(-0.5deg); }
+      50% { transform: translateY(-6px) rotate(0.6deg); }
+      100% { transform: translateY(2px) rotate(-0.4deg); }
+    }
+    .character-float {
+      animation: gentle-bob 4s ease-in-out infinite alternate;
     }
 
-    .meter-bar {
-      transition: width 90ms ease-out, background-color 150ms ease;
+    /* Custom smooth transition */
+    .smooth-meter {
+      transition: width 100ms cubic-bezier(0.1, 0.7, 0.1, 1), background-color 200ms ease;
     }
-
-    /* Custom scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-      border-radius: 999px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 999px;
+    .needle-move {
+      transition: left 90ms cubic-bezier(0.2, 0.8, 0.2, 1);
     }
   </style>
 </head>
-<body class="text-slate-800 antialiased p-3 sm:p-6 lg:p-8 flex flex-col justify-between">
+<body class="text-slate-800 antialiased p-3 sm:p-5 lg:p-7 flex flex-col justify-between select-none">
 
-  <div class="max-w-6xl mx-auto w-full">
-    <header class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-indigo-100">
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-indigo-200">
-          שׂ
-        </div>
-        <div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
-            סְפִּיקִי <span class="text-xs sm:text-sm font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">PoC בדיקת שורקות</span>
-          </h1>
-          <p class="text-sm text-slate-500">קלינאי תקשורת דיגיטלי לניתוח אקוסטי בזמן אמת של האותיות ש', ס' ו-ז'</p>
-        </div>
+  <!-- Header -->
+  <header class="max-w-6xl mx-auto w-full flex flex-wrap items-center justify-between gap-4 pb-4 mb-4 border-b border-indigo-200/70">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-purple-600 text-white flex items-center justify-center text-2xl font-black shadow-lg shadow-indigo-300">
+        סְ
       </div>
-
-      <!-- Action status & Mic Switch -->
-      <div class="flex items-center gap-2 sm:gap-3">
-        <button id="calibrateBtn" title="מדידת רעש הרקע בחדר להתאמת הרגישות" class="text-xs sm:text-sm font-medium px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition flex items-center gap-1.5 shadow-sm active:scale-95">
-          <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
-          <span id="calibrateLabel">כיול רעש</span>
-        </button>
-
-        <button id="toggleMicBtn" class="px-5 py-2.5 rounded-xl font-bold text-white shadow-md transition-all flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-indigo-200">
-          <svg id="micIcon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-8 0h8m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"/>
-          </svg>
-          <span id="micButtonText">הפעל מיקרופון</span>
-        </button>
-      </div>
-    </header>
-
-    <main class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-      <!-- LEFT COLUMN: Practice target, Avatar & Feedback (7 cols) -->
-      <section class="lg:col-span-7 flex flex-col gap-6">
-        
-        <!-- Target Selector & Sentence Card -->
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col gap-4">
-          <div class="flex items-center justify-between flex-wrap gap-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">יעד התרגול הנוכחי</span>
-            <div class="flex gap-1.5 p-1 bg-slate-100 rounded-xl" id="letterTabs">
-              <button data-target="S" class="letter-tab px-4 py-1.5 rounded-lg text-sm font-bold transition bg-white text-indigo-700 shadow-sm">ס' (צליל שורק גבוה)</button>
-              <button data-target="SH" class="letter-tab px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition">ש' (צליל עמוק ורחב)</button>
-              <button data-target="Z" class="letter-tab px-4 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition">ז' (קולי ומזמזם)</button>
-            </div>
-          </div>
-
-          <!-- Active Sentence Display -->
-          <div class="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 to-blue-50/40 border border-indigo-100/80">
-            <div class="flex items-start justify-between gap-3">
-              <div>
-                <p id="targetHint" class="text-xs text-indigo-500 font-semibold mb-1">התרכז באותיות ס' – לשון נעוצה בחוזקה מאחורי השיניים התחתונות:</p>
-                <h2 id="targetSentence" class="text-2xl sm:text-3xl font-extrabold text-slate-900 leading-snug">
-                  סַבָּא שָׂם סֻכָּר בַּסִּיר הַסָּגוּר.
-                </h2>
-              </div>
-              <button id="nextSentenceBtn" title="משפט הבא" class="p-2.5 rounded-xl bg-white text-slate-600 hover:text-indigo-600 border border-indigo-100 hover:border-indigo-300 transition shadow-sm active:scale-95">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
-              </button>
-            </div>
-
-            <!-- Phoneme breakdown highlights -->
-            <div id="sentenceBreakdown" class="mt-3.5 flex flex-wrap gap-1.5 text-xs text-slate-600">
-              <span class="bg-indigo-100/90 text-indigo-800 px-2 py-0.5 rounded-md font-semibold">יעד: ס' תדר 5500-8500Hz</span>
-              <span class="bg-white/80 border border-slate-200 text-slate-600 px-2 py-0.5 rounded-md">זרימת אוויר ממוקדת במרכז</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center gap-6">
-          <!-- Avatar Display Canvas / SVG -->
-          <div class="relative w-48 h-48 flex-shrink-0 flex items-center justify-center">
-            <!-- Halo Glow behind character -->
-            <div id="avatarHalo" class="absolute w-44 h-44 rounded-full bg-indigo-100/70 transition-all duration-300 blur-lg"></div>
-
-            <!-- Vector Character (Spike the Speech Hedgehog / Coach) -->
-            <svg id="avatarSvg" viewBox="0 0 200 200" class="w-44 h-44 float-avatar transition-transform duration-300 z-10" xmlns="http://www.w3.org/2000/svg">
-              <defs>
-                <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#818cf8"/>
-                  <stop offset="100%" stop-color="#4f46e5"/>
-                </linearGradient>
-                <linearGradient id="earGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stop-color="#f472b6"/>
-                  <stop offset="100%" stop-color="#ec4899"/>
-                </linearGradient>
-              </defs>
-
-              <!-- Stylized quills / hairstyle representing acoustic waves -->
-              <path id="quills" d="M45,75 Q20,60 30,35 Q55,48 65,60 Q80,20 100,20 Q120,20 135,60 Q145,48 170,35 Q180,60 155,75 Z" fill="#4338ca"/>
-              
-              <!-- Ears -->
-              <circle cx="50" cy="85" r="18" fill="#6366f1"/>
-              <circle cx="50" cy="85" r="10" fill="url(#earGrad)"/>
-              <circle cx="150" cy="85" r="18" fill="#6366f1"/>
-              <circle cx="150" cy="85" r="10" fill="url(#earGrad)"/>
-
-              <!-- Main Head -->
-              <circle cx="100" cy="110" r="65" fill="url(#bodyGrad)"/>
-
-              <!-- Cheeks (Blushing) -->
-              <circle id="leftCheek" cx="64" cy="125" r="8" fill="#f43f5e" opacity="0.25"/>
-              <circle id="rightCheek" cx="136" cy="125" r="8" fill="#f43f5e" opacity="0.25"/>
-
-              <!-- Eyes (Animated) -->
-              <g id="eyes" class="eye-blink">
-                <!-- Left Eye -->
-                <circle cx="75" cy="100" r="11" fill="#ffffff"/>
-                <circle id="leftPupil" cx="77" cy="100" r="6" fill="#0f172a"/>
-                <circle cx="79" cy="97" r="2.5" fill="#ffffff"/>
-
-                <!-- Right Eye -->
-                <circle cx="125" cy="100" r="11" fill="#ffffff"/>
-                <circle id="rightPupil" cx="127" cy="100" r="6" fill="#0f172a"/>
-                <circle cx="129" cy="97" r="2.5" fill="#ffffff"/>
-              </g>
-
-              <!-- Eyebrows for expressions -->
-              <path id="leftBrow" d="M66,85 Q75,83 85,86" stroke="#312e81" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-              <path id="rightBrow" d="M115,86 Q125,83 134,85" stroke="#312e81" stroke-width="3.5" stroke-linecap="round" fill="none"/>
-
-              <!-- Cute Snout & Nose -->
-              <ellipse cx="100" cy="116" rx="6" ry="4" fill="#1e1b4b"/>
-
-              <!-- Dynamic Mouth (Controlled by articulation state) -->
-              <!-- Default: Gentle smile. Modified via JS path commands -->
-              <path id="avatarMouth" d="M86,132 Q100,144 114,132" stroke="#1e1b4b" stroke-width="4.5" stroke-linecap="round" fill="none"/>
-
-              <!-- Tongue illustration (visible when showing placement) -->
-              <path id="avatarTongue" d="M93,138 Q100,147 107,138 Z" fill="#fb7185" opacity="0" class="transition-opacity duration-200"/>
-
-              <!-- Glasses / Coaching element -->
-              <path d="M60,100 Q75,87 90,100 M110,100 Q125,87 140,100 M90,100 L110,100" stroke="#fcd34d" stroke-width="3" fill="none" opacity="0.75"/>
-            </svg>
-          </div>
-
-          <!-- Coach Feedback bubble & Articulation Guidance -->
-          <div class="flex-1 flex flex-col justify-center">
-            <div class="flex items-center gap-2 mb-2">
-              <span id="coachMoodBadge" class="text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700">בהמתנה לדיבור...</span>
-              <span id="detectedIndicator" class="text-xs font-medium text-slate-500">הפעל מיקרופון כדי לבדוק</span>
-            </div>
-
-            <!-- Dynamic Feedback Text -->
-            <h3 id="feedbackMainTitle" class="text-lg font-bold text-slate-800 leading-snug">
-              שלום! אני מוכן להקשיב לך.
-            </h3>
-            <p id="feedbackDetailText" class="text-sm text-slate-600 mt-1 leading-relaxed">
-              לחץ על "הפעל מיקרופון" והגש את המשפט שלמעלה בקול רם, ברור ובקצב נינוח. שים לב להדגשת אות המטרה.
-            </p>
-
-            <!-- Anatomical / Placement Guidance Box -->
-            <div id="articulatoryTipBox" class="mt-3.5 p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2">
-              <span class="text-base leading-none">💡</span>
-              <div>
-                <strong class="font-bold">טיפ קלינאי למנח הפה:</strong>
-                <span id="articulatoryTip">בהגיית ס' – הצמד את קצה הלשון לחלק הפנימי של השיניים התחתונות, והעבר סילון אוויר דק ומהיר במרכז.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100">
-          <h4 class="text-sm font-bold text-slate-800 mb-4 flex items-center justify-between">
-            <span>מדדי אנרגיה פונטית (Bands) בזמן אמת</span>
-            <span id="noiseLevelLabel" class="text-xs font-normal text-slate-400">רעש סביבתי: תקין</span>
-          </h4>
-
-          <div class="space-y-3.5">
-            <!-- ס' S Meter (5.5kHz - 8.5kHz) -->
-            <div>
-              <div class="flex justify-between text-xs font-semibold mb-1">
-                <span class="text-emerald-700 flex items-center gap-1.5">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                  אות ס' (תדרים גבוהים 5.5 - 8.5 kHz)
-                </span>
-                <span id="sValText" class="text-slate-500">0%</span>
-              </div>
-              <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden p-0.5">
-                <div id="sMeter" class="meter-bar h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
-              </div>
-            </div>
-
-            <!-- ש' SH Meter (2.5kHz - 4.5kHz) -->
-            <div>
-              <div class="flex justify-between text-xs font-semibold mb-1">
-                <span class="text-indigo-700 flex items-center gap-1.5">
-                  <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-                  אות ש' (תדרים בינוניים-גבוהים 2.5 - 4.5 kHz)
-                </span>
-                <span id="shValText" class="text-slate-500">0%</span>
-              </div>
-              <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden p-0.5">
-                <div id="shMeter" class="meter-bar h-full bg-indigo-500 rounded-full" style="width: 0%"></div>
-              </div>
-            </div>
-
-            <!-- ז' Z Meter (Voicing F0 + High Fricative) -->
-            <div>
-              <div class="flex justify-between text-xs font-semibold mb-1">
-                <span class="text-purple-700 flex items-center gap-1.5">
-                  <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
-                  אות ז' (קוליות מיתרים 100-250 Hz + חיכוך)
-                </span>
-                <span id="zValText" class="text-slate-500">0%</span>
-              </div>
-              <div class="h-3 w-full bg-slate-100 rounded-full overflow-hidden p-0.5">
-                <div id="zMeter" class="meter-bar h-full bg-purple-500 rounded-full" style="width: 0%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </section>
-
-      <!-- RIGHT COLUMN: Real-Time Audio Canvas, History & Diagnostics (5 cols) -->
-      <section class="lg:col-span-5 flex flex-col gap-6">
-
-        <!-- Real-Time FFT Spectrogram Canvas -->
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex flex-col">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="font-bold text-slate-800 text-sm">ספקטרוגרם תדרים בזמן אמת</h3>
-              <p class="text-xs text-slate-400">ניתוח FFT של 2048 דגימות (0 Hz עד ~11 kHz)</p>
-            </div>
-            <span id="livePpm" class="text-xs font-mono font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">0 dB</span>
-          </div>
-
-          <div class="relative w-full h-44 bg-slate-950 rounded-2xl overflow-hidden border border-slate-800">
-            <canvas id="visualizerCanvas" class="w-full h-full block"></canvas>
-            
-            <!-- Band markers overlay for intuitive understanding -->
-            <div class="absolute bottom-1 inset-x-0 flex justify-between px-3 text-[10px] font-mono text-slate-400/80 pointer-events-none">
-              <span>0Hz (ז' קוליות)</span>
-              <span>3.5kHz (ש')</span>
-              <span>7kHz (ס')</span>
-              <span>11kHz</span>
-            </div>
-          </div>
-
-          <div class="mt-3 flex items-center justify-between text-xs text-slate-500">
-            <span class="flex items-center gap-1">
-              <span class="w-2 h-2 rounded bg-indigo-400"></span>
-              תחום ש'
-            </span>
-            <span class="flex items-center gap-1">
-              <span class="w-2 h-2 rounded bg-emerald-400"></span>
-              תחום ס'
-            </span>
-            <span class="flex items-center gap-1">
-              <span class="w-2 h-2 rounded bg-purple-400"></span>
-              רטט ז'
-            </span>
-          </div>
-        </div>
-
-        <!-- Exercise Library Quick Selector -->
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 flex-1">
-          <h3 class="font-bold text-slate-800 text-sm mb-3">מאגר משפטי אימון</h3>
-          
-          <div id="sentenceListContainer" class="space-y-2 max-h-64 overflow-y-auto pr-1">
-            <!-- Populated via Javascript -->
-          </div>
-
-          <!-- Clinical Rule Guide -->
-          <div class="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-500">
-            <div class="font-bold text-slate-700 mb-1.5">כיצד עובד הזיהוי?</div>
-            <ul class="list-disc pr-4 space-y-1 text-slate-500 leading-relaxed">
-              <li><strong>ס' (סמ"ך / שׂין שמאלית):</strong> מרווח צר יותר מקפיץ את התדרים מעל 5.5kHz.</li>
-              <li><strong>ש' (שִׁין ימנית):</strong> חלל פה מורחב מוריד את שיא התדר לאזור ה-3-4kHz.</li>
-              <li><strong>שיבוש בין-שיני (Lisp):</strong> לשון בולטת בין השיניים מנמיכה את תדרי ה-ס' לכיוון ת' או ש' רפה.</li>
-            </ul>
-          </div>
-        </div>
-
-      </section>
-    </main>
-
-    <div id="customModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 text-center animate-bounce-short">
-        <div id="modalIcon" class="w-14 h-14 mx-auto rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-3xl mb-4">
-          💡
-        </div>
-        <h3 id="modalTitle" class="text-xl font-bold text-slate-900 mb-2">כיול רעש סביבתי</h3>
-        <p id="modalDesc" class="text-sm text-slate-600 mb-6 leading-relaxed">
-          נא לשמור על שקט מוחלט בחדר למשך 2 שניות כדי שנוכל לקזז את רעש המזגן והמאווררים.
-        </p>
-        <button id="modalCloseBtn" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition shadow-md active:scale-95">
-          הבנתי, בוא נמשיך
-        </button>
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 flex items-center gap-2">
+          סְפִּיקִי <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">Spectral AI 2.0</span>
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600">ניתוח מרכז כובד אקוסטי (Spectral Centroid) מותאם למובייל</p>
       </div>
     </div>
-  </div>
 
-  <script>
-    /* Database of clinical speech exercises */
-    const EXERCISE_DATA = {
-      S: [
-        {
-          sentence: "סַבָּא שָׂם סֻכָּר בַּסִּיר הַסָּגוּר.",
-          tip: "בהגיית ס' – שמור על שיניים כמעט סגורות, קצה הלשון מאחורי השיניים התחתונות, והוצא צליל שריקה חד.",
-          notes: "מיקוד בהברות סָ, סֻ, סִ"
-        },
-        {
-          sentence: "סִירָה שָׂטָה בַּסַּעַר הַסוֹעֵר.",
-          tip: "שים לב שאינך מעגל את השפתיים יותר מדי כדי שה-ס' לא תישמע כמו ש'.",
-          notes: "מיקוד במעבר בין ס' ל-ט'"
-        },
-        {
-          sentence: "סִימָה אָסְפָה שְׂמָחוֹת וְסַלְסִלּוֹת.",
-          tip: "שמור על זרימת אוויר רציפה במרכז החריץ הדנטלי.",
-          notes: "צלילי ס' רצופים"
-        }
-      ],
-      SH: [
-        {
-          sentence: "שֶׁמֶשׁ שׁוֹקַעַת מֵעַל שָׂדֶה שָׁקֵט.",
-          tip: "בהגיית ש' – עיגול קל של השפתיים, קשת הלשון עולה מעט לעבר החך הקשה, הצליל רחב ועמוק.",
-          notes: "מיקוד בהברות שֶׁ, שׁוֹ, שָׁ"
-        },
-        {
-          sentence: "שִׁישִׁי הַשּׁוֹעָל שָׁתָה מִשְּׁלוּלִית קְטַנָּה.",
-          tip: "ודא שהלשון אינה נוגעת בשיניים הקדמיות אלא נסוגה מעט לאחור.",
-          notes: "הבחנה בין ש' לתנועות צרות"
-        },
-        {
-          sentence: "שְׁמוֹנָה שׁוֹטְרִים שָׁמְרוּ עַל הַשַּׁעַר.",
-          tip: "אוויר רחב ורך, כמו שאומרים 'ששש...' להרגעת תינוק.",
-          notes: "רצף צלילי ש' מודגשים"
-        }
-      ],
-      Z: [
-        {
-          sentence: "זְבוּב זִמְזֵם סְבִיב שׁוֹשַׁנָּה זְהֻבָּה.",
-          tip: "בהגיית ז' – אותו מנח בדיוק כמו ס', אך הפעם יש להפעיל את מיתרי הקול (תרגיש רטט קל בגרון).",
-          notes: "ניגוד מובהק בין ס' (לא קולי) ל-ז' (קולי)"
-        },
-        {
-          sentence: "זָקֵן זָרִיז זָז עִם מַזְלֵג זָהָב.",
-          tip: "הנח שתי אצבעות על הגרוגרת ובדוק שאתה מרגיש רטט חזק בזמן ה-ז'.",
-          notes: "חיזוק קוליות העיצור"
-        },
-        {
-          sentence: "זְמִירִים זִמְּרוּ בַּחַלּוֹן הַמֻּזְהָב.",
-          tip: "שמור על קוליות יציבה לאורך כל העיצור ללא הפסקת הרטט.",
-          notes: "רציפות קולית"
-        }
-      ]
-    };
+    <!-- Quick Actions -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Calibration Wizard Launcher -->
+      <button id="openCalibBtn" class="px-3.5 py-2 sm:py-2.5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 font-semibold text-xs sm:text-sm transition flex items-center gap-1.5 shadow-sm active:scale-95">
+        <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <span>כיול מיקרופון אישי</span>
+      </button>
 
-    /* State Management */
-    let currentTarget = 'S';
-    let currentSentenceIndex = 0;
-    let isListening = false;
-    let audioContext = null;
-    let analyser = null;
-    let microphoneStream = null;
-    let animationFrameId = null;
-    let noiseFloor = 18; // Baseline noise threshold
-    let consecutiveCorrectFrames = 0;
-    let consecutiveErrorFrames = 0;
+      <!-- Toggle Mic Button -->
+      <button id="toggleMicBtn" class="px-5 py-2 sm:py-2.5 rounded-xl font-bold text-white shadow-md transition flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:scale-95 shadow-indigo-300">
+        <svg id="micIcon" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-8 0h8m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"/>
+        </svg>
+        <span id="micBtnText">הפעל מיקרופון</span>
+      </button>
+    </div>
+  </header>
 
-    /* DOM Elements */
-    const toggleMicBtn = document.getElementById('toggleMicBtn');
-    const micButtonText = document.getElementById('micButtonText');
-    const micIcon = document.getElementById('micIcon');
-    const targetSentenceElem = document.getElementById('targetSentence');
-    const targetHintElem = document.getElementById('targetHint');
-    const articulatoryTipElem = document.getElementById('articulatoryTip');
-    const nextSentenceBtn = document.getElementById('nextSentenceBtn');
-    const letterTabs = document.querySelectorAll('.letter-tab');
-    const sentenceListContainer = document.getElementById('sentenceListContainer');
-    const calibrateBtn = document.getElementById('calibrateBtn');
-    const calibrateLabel = document.getElementById('calibrateLabel');
+  <main class="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-5 flex-1">
 
-    /* Avatar SVG Elements */
-    const avatarMouth = document.getElementById('avatarMouth');
-    const avatarTongue = document.getElementById('avatarTongue');
-    const leftBrow = document.getElementById('leftBrow');
-    const rightBrow = document.getElementById('rightBrow');
-    const avatarHalo = document.getElementById('avatarHalo');
-    const coachMoodBadge = document.getElementById('coachMoodBadge');
-    const feedbackMainTitle = document.getElementById('feedbackMainTitle');
-    const feedbackDetailText = document.getElementById('feedbackDetailText');
-    const detectedIndicator = document.getElementById('detectedIndicator');
+    <!-- LEFT COLUMN: Practice, Avatar & Visual feedback (7 cols) -->
+    <section class="lg:col-span-7 flex flex-col gap-5">
 
-    /* Meters */
-    const sMeter = document.getElementById('sMeter');
-    const shMeter = document.getElementById('shMeter');
-    const zMeter = document.getElementById('zMeter');
-    const sValText = document.getElementById('sValText');
-    const shValText = document.getElementById('shValText');
-    const zValText = document.getElementById('zValText');
-    const livePpm = document.getElementById('livePpm');
-    const noiseLevelLabel = document.getElementById('noiseLevelLabel');
+      <!-- Target & Mode Switcher -->
+      <div class="bg-white/90 backdrop-blur-md rounded-3xl p-5 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-700">בחר עיצור לאימון:</span>
+            <div id="modeSelector" class="flex gap-1 bg-slate-100 p-1 rounded-xl">
+              <button data-target="S" class="target-tab px-3.5 py-1.5 rounded-lg text-sm font-bold bg-white text-indigo-800 shadow-sm transition">ס' (אלביאולרי)</button>
+              <button data-target="SH" class="target-tab px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition">ש' (פוסט-אלביאולרי)</button>
+              <button data-target="Z" class="target-tab px-3.5 py-1.5 rounded-lg text-sm font-medium text-slate-600 hover:text-slate-900 transition">ז' (קולי ומזמזם)</button>
+            </div>
+          </div>
 
-    /* Visualizer Canvas */
-    const canvas = document.getElementById('visualizerCanvas');
-    const canvasCtx = canvas.getContext('2d');
+          <div class="flex items-center gap-1.5 text-xs text-slate-500">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-300" id="liveAudioLed"></span>
+            <span id="audioEngineStatus">מיקרופון מנוטרל</span>
+          </div>
+        </div>
 
-    // Resize canvas based on container
-    function resizeCanvas() {
-      if (!canvas) return;
-      canvas.width = canvas.parentElement.clientWidth;
-      canvas.height = canvas.parentElement.clientHeight;
-    }
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
+        <!-- Exercise Sentence Box -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-indigo-50/90 to-blue-50/50 border border-indigo-100 flex flex-col gap-2 relative">
+          <div class="flex items-start justify-between gap-3">
+            <div class="w-full">
+              <div class="flex items-center justify-between mb-1">
+                <span id="exerciseTypeLabel" class="text-xs font-bold text-indigo-600 uppercase tracking-wide">משפט תרגול</span>
+                <span id="exerciseCountBadge" class="text-[11px] font-semibold text-slate-400">1 מתוך 4</span>
+              </div>
+              <h2 id="currentSentence" class="text-2xl sm:text-3xl font-black text-slate-900 leading-snug">
+                סַבָּא שָׂם סֻכָּר בַּסִּיר.
+              </h2>
+            </div>
+            <button id="nextPhraseBtn" title="משפט הבא" class="p-2.5 rounded-xl bg-white text-slate-700 hover:text-indigo-600 border border-slate-200 hover:border-indigo-300 shadow-xs transition active:scale-90">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
 
-    function updateExerciseView() {
-      const exercises = EXERCISE_DATA[currentTarget];
-      const ex = exercises[currentSentenceIndex % exercises.length];
+          <!-- Anatomical Placement Cue -->
+          <p id="articulatoryHint" class="text-xs sm:text-sm text-indigo-950 font-medium bg-white/70 rounded-xl p-2.5 border border-indigo-100/60 mt-1">
+            🎯 <strong>מנח הלשון:</strong> הצמד את קצה הלשון אל מאחורי השיניים התחתונות. צור חריץ צר וסילון אוויר חד ודק במרכז.
+          </p>
+        </div>
+      </div>
 
-      targetSentenceElem.textContent = ex.sentence;
-      articulatoryTipElem.textContent = ex.tip;
-      
-      if (currentTarget === 'S') {
-        targetHintElem.textContent = "התרכז באותיות ס' – לשון נעוצה בחוזקה מאחורי השיניים התחתונות:";
-      } else if (currentTarget === 'SH') {
-        targetHintElem.textContent = "התרכז באותיות ש' – שפתיים מעוגלות, לשון משוכה מעט לאחור:";
-      } else {
-        targetHintElem.textContent = "התרכז באותיות ז' – צליל שורק בתוספת רטט מיתרי הקול בגרון:";
-      }
-
-      renderSentenceList();
-    }
-
-    function renderSentenceList() {
-      sentenceListContainer.innerHTML = '';
-      const list = EXERCISE_DATA[currentTarget];
-      list.forEach((item, index) => {
-        const itemBtn = document.createElement('button');
-        const isActive = index === (currentSentenceIndex % list.length);
-        itemBtn.className = `w-full text-right p-2.5 rounded-xl border text-xs sm:text-sm font-medium transition flex items-center justify-between ${
-          isActive 
-            ? 'bg-indigo-50 border-indigo-300 text-indigo-900 font-bold shadow-xs' 
-            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-        }`;
-        itemBtn.innerHTML = `
-          <span class="truncate pl-2">${item.sentence}</span>
-          <span class="text-[11px] px-2 py-0.5 rounded-full ${isActive ? 'bg-indigo-200 text-indigo-900' : 'bg-slate-100 text-slate-500'}">${item.notes}</span>
-        `;
-        itemBtn.addEventListener('click', () => {
-          currentSentenceIndex = index;
-          updateExerciseView();
-        });
-        sentenceListContainer.appendChild(itemBtn);
-      });
-    }
-
-    /* Target Tab Switching */
-    letterTabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        letterTabs.forEach(t => {
-          t.classList.remove('bg-white', 'text-indigo-700', 'shadow-sm', 'font-bold');
-          t.classList.add('text-slate-600', 'font-medium');
-        });
-        tab.classList.add('bg-white', 'text-indigo-700', 'shadow-sm', 'font-bold');
-        tab.classList.remove('text-slate-600', 'font-medium');
-
-        currentTarget = tab.getAttribute('data-target');
-        currentSentenceIndex = 0;
-        updateExerciseView();
-        setAvatarExpression('neutral', 'החלפת יעד אימון', 'קרא את המשפט החדש בקול כשאתה מוכן.');
-      });
-    });
-
-    nextSentenceBtn.addEventListener('click', () => {
-      currentSentenceIndex++;
-      updateExerciseView();
-    });
-
-    function setAvatarExpression(mood, title, detail) {
-      if (title) feedbackMainTitle.textContent = title;
-      if (detail) feedbackDetailText.textContent = detail;
-
-      switch(mood) {
-        case 'happy': // Great job
-          coachMoodBadge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800";
-          coachMoodBadge.textContent = "הגייה מעולה! ✨";
-          avatarHalo.className = "absolute w-48 h-48 rounded-full bg-emerald-200/80 transition-all duration-300 blur-xl scale-110";
-          // Big smile
-          avatarMouth.setAttribute('d', 'M80,128 Q100,152 120,128');
-          avatarTongue.setAttribute('opacity', '0');
-          leftBrow.setAttribute('d', 'M66,82 Q75,76 85,83');
-          rightBrow.setAttribute('d', 'M115,83 Q125,76 134,82');
-          break;
-
-        case 'encourage': // Needs fix (e.g. said SH instead of S)
-          coachMoodBadge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800";
-          coachMoodBadge.textContent = "זקוק לכוונון קל 🎯";
-          avatarHalo.className = "absolute w-44 h-44 rounded-full bg-amber-200/70 transition-all duration-300 blur-lg";
-          // Small O or guiding mouth
-          avatarMouth.setAttribute('d', 'M90,132 Q100,140 110,132');
-          avatarTongue.setAttribute('opacity', '0.9'); // Showing tongue position
-          leftBrow.setAttribute('d', 'M66,86 Q75,82 85,86');
-          rightBrow.setAttribute('d', 'M115,84 Q125,81 134,88');
-          break;
-
-        case 'listening': // User is currently speaking
-          coachMoodBadge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-800 animate-pulse";
-          coachMoodBadge.textContent = "מקשיב בריכוז... 👂";
-          avatarHalo.className = "absolute w-44 h-44 rounded-full bg-indigo-200/80 transition-all duration-200 blur-md";
-          // Attentive flat / slight smile
-          avatarMouth.setAttribute('d', 'M86,134 Q100,140 114,134');
-          avatarTongue.setAttribute('opacity', '0');
-          leftBrow.setAttribute('d', 'M66,83 Q75,81 85,84');
-          rightBrow.setAttribute('d', 'M115,84 Q125,81 134,83');
-          break;
-
-        case 'neutral':
-        default:
-          coachMoodBadge.className = "text-xs font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700";
-          coachMoodBadge.textContent = isListening ? "מחכה לקול שלך..." : "מיקרופון כבוי";
-          avatarHalo.className = "absolute w-44 h-44 rounded-full bg-indigo-100/60 transition-all duration-300 blur-lg";
-          // Gentle resting smile
-          avatarMouth.setAttribute('d', 'M86,132 Q100,142 114,132');
-          avatarTongue.setAttribute('opacity', '0');
-          leftBrow.setAttribute('d', 'M66,85 Q75,83 85,86');
-          rightBrow.setAttribute('d', 'M115,86 Q125,83 134,85');
-          break;
-      }
-    }
-
-    async function initAudioEngine() {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        audioContext = new AudioCtx();
+      <!-- Interactive Speech Coach Avatar -->
+      <div class="bg-white/90 backdrop-blur-md rounded-3xl p-5 sm:p-6 shadow-sm border border-slate-200/80 flex flex-col sm:flex-row items-center gap-6">
         
-        microphoneStream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: false,
-            noiseSuppression: false,
-            autoGainControl: true
-          }
-        });
+        <!-- SVG Avatar -->
+        <div class="relative w-44 h-44 flex-shrink-0 flex items-center justify-center">
+          <div id="avatarHalo" class="absolute w-40 h-40 rounded-full bg-indigo-100/80 blur-xl transition-all duration-300"></div>
 
-        const source = audioContext.createMediaStreamSource(microphoneStream);
-        analyser = audioContext.createAnalyser();
-        analyser.fftSize = 2048; // Granular resolution for high frequency fricatives
-        analyser.smoothingTimeConstant = 0.5; // Responsive for consonant bursts
+          <svg id="coachSvg" viewBox="0 0 200 200" class="w-40 h-40 character-float z-10" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#818cf8"/>
+                <stop offset="100%" stop-color="#4f46e5"/>
+              </linearGradient>
+              <linearGradient id="innerEarGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stop-color="#f472b6"/>
+                <stop offset="100%" stop-color="#db2777"/>
+              </linearGradient>
+            </defs>
 
-        source.connect(analyser);
+            <!-- Spikes / Hair waves -->
+            <path d="M45,75 Q20,55 35,32 Q58,45 68,58 Q82,18 100,18 Q118,18 132,58 Q142,45 165,32 Q180,55 155,75 Z" fill="#3730a3"/>
 
-        isListening = true;
-        updateMicButtonUI(true);
-        setAvatarExpression('listening', 'אני מקשיב!', 'הקרא את המשפט בבירור.');
-        startAudioProcessingLoop();
-      } catch (err) {
-        console.error('Audio initialization error:', err);
-        showModal('שגיאת גישה למיקרופון', 'יש לאשר גישה למיקרופון בדפדפן כדי שהאפליקציה תוכל לנתח את ההגייה.');
-        updateMicButtonUI(false);
-      }
-    }
+            <!-- Ears -->
+            <circle cx="48" cy="85" r="17" fill="#6366f1"/>
+            <circle cx="48" cy="85" r="9" fill="url(#innerEarGrad)"/>
+            <circle cx="152" cy="85" r="17" fill="#6366f1"/>
+            <circle cx="152" cy="85" r="9" fill="url(#innerEarGrad)"/>
 
-    function stopAudioEngine() {
-      isListening = false;
-      if (animationFrameId) cancelAnimationFrame(animationFrameId);
-      if (microphoneStream) {
-        microphoneStream.getTracks().forEach(track => track.stop());
-        microphoneStream = null;
-      }
-      if (audioContext && audioContext.state !== 'closed') {
-        audioContext.close();
-      }
-      updateMicButtonUI(false);
-      resetMeters();
-      setAvatarExpression('neutral', 'מיקרופון מופסק', 'לחץ על הפעל מיקרופון כדי להמשיך באימון.');
-    }
+            <!-- Head -->
+            <circle cx="100" cy="112" r="64" fill="url(#skinGrad)"/>
 
-    function updateMicButtonUI(active) {
-      if (active) {
-        toggleMicBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-        toggleMicBtn.classList.add('bg-rose-500', 'hover:bg-rose-600', 'shadow-rose-200');
-        micButtonText.textContent = "עצור מיקרופון";
-        micIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/>`;
-      } else {
-        toggleMicBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
-        toggleMicBtn.classList.remove('bg-rose-500', 'hover:bg-rose-600', 'shadow-rose-200');
-        micButtonText.textContent = "הפעל מיקרופון";
-        micIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-8 0h8m-4-8a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z"/>`;
-      }
-    }
+            <!-- Cute Blushing Cheeks -->
+            <circle id="cheekL" cx="64" cy="125" r="8" fill="#fb7185" opacity="0.3"/>
+            <circle id="cheekR" cx="136" cy="125" r="8" fill="#fb7185" opacity="0.3"/>
 
-    function resetMeters() {
-      sMeter.style.width = '0%';
-      shMeter.style.width = '0%';
-      zMeter.style.width = '0%';
-      sValText.textContent = '0%';
-      shValText.textContent = '0%';
-      zValText.textContent = '0%';
-      livePpm.textContent = '0 dB';
-      detectedIndicator.textContent = "המיקרופון אינו פעיל";
-    }
+            <!-- Eyes Group with Blink -->
+            <g id="eyesGroup" class="eye-blink">
+              <circle cx="74" cy="100" r="11" fill="#ffffff"/>
+              <circle id="pupilL" cx="76" cy="100" r="6" fill="#0f172a"/>
+              <circle cx="78" cy="97" r="2.5" fill="#ffffff"/>
 
-    function startAudioProcessingLoop() {
-      const bufferLength = analyser.frequencyBinCount;
-      const dataArray = new Uint8Array(bufferLength);
-      const sampleRate = audioContext.sampleRate;
-      const nyquist = sampleRate / 2;
-      const binWidth = nyquist / bufferLength;
+              <circle cx="126" cy="100" r="11" fill="#ffffff"/>
+              <circle id="pupilR" cx="128" cy="100" r="6" fill="#0f172a"/>
+              <circle cx="130" cy="97" r="2.5" fill="#ffffff"/>
+            </g>
 
-      // Helper to compute average energy in frequency range (Hz)
-      function getBandEnergy(minFreq, maxFreq) {
-        const startBin = Math.max(0, Math.floor(minFreq / binWidth));
-        const endBin = Math.min(bufferLength - 1, Math.floor(maxFreq / binWidth));
-        let sum = 0;
-        let count = 0;
-        for (let i = startBin; i <= endBin; i++) {
-          sum += dataArray[i];
-          count++;
-        }
-        return count > 0 ? (sum / count) : 0;
-      }
+            <!-- Eyebrows -->
+            <path id="browL" d="M64,85 Q74,82 84,86" stroke="#312e81" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+            <path id="browR" d="M116,86 Q126,82 136,85" stroke="#312e81" stroke-width="3.5" stroke-linecap="round" fill="none"/>
 
-      function loop() {
-        if (!isListening) return;
-        animationFrameId = requestAnimationFrame(loop);
+            <!-- Nose -->
+            <ellipse cx="100" cy="116" rx="5" ry="3.5" fill="#1e1b4b"/>
 
-        analyser.getByteFrequencyData(dataArray);
+            <!-- Mouth (Morphs dynamically depending on articulation state) -->
+            <path id="mouthShape" d="M85,134 Q100,146 115,134" stroke="#0f172a" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+            <!-- Visual tongue cue (appears on interdental error) -->
+            <path id="tongueShape" d="M92,137 Q100,148 108,137 Z" fill="#f43f5e" opacity="0" class="transition-opacity duration-150"/>
 
-        // Overall voice volume metric
-        let totalEnergy = 0;
-        for (let i = 0; i < bufferLength; i++) {
-          totalEnergy += dataArray[i];
-        }
-        const avgEnergy = totalEnergy / bufferLength;
-        const dBEstimate = Math.round(avgEnergy);
-        livePpm.textContent = `${dBEstimate} dB`;
+            <!-- Glasses (therapist style) -->
+            <path d="M58,100 Q74,86 90,100 M110,100 Q126,86 142,100 M90,100 L110,100" stroke="#fef08a" stroke-width="3" fill="none" opacity="0.85"/>
+          </svg>
+        </div>
 
-        // Render Canvas Visualizer
-        drawSpectrogram(dataArray, bufferLength, binWidth);
+        <!-- Feedback & Diagnosis -->
+        <div class="flex-1 text-center sm:text-right">
+          <div class="flex items-center justify-center sm:justify-start gap-2 mb-1.5">
+            <span id="coachBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700">
+              ממתין לקולך...
+            </span>
+            <span id="detectedPhonemeBadge" class="text-xs font-bold font-mono px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700">
+              צליל: --
+            </span>
+          </div>
 
-        // Discard low background silence
-        if (avgEnergy < noiseFloor) {
-          detectedIndicator.textContent = "מקשיב (שקט סביבתי)...";
-          sMeter.style.width = '0%';
-          shMeter.style.width = '0%';
-          zMeter.style.width = '0%';
-          return;
-        }
+          <h3 id="feedbackHeader" class="text-xl font-black text-slate-900 leading-snug">
+            מוכן להתחיל באימון!
+          </h3>
+          <p id="feedbackExplanation" class="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
+            לחץ על "הפעל מיקרופון" והגש את המשפט למעלה, או התחל בהפקת צליל שורק מתמשך כדי לבחון את המד.
+          </p>
 
-        // Acoustic band definitions for Hebrew Sibilants
-        // Band 1: Fundamental Fo Voicing (100 - 250 Hz)
-        const f0Energy = getBandEnergy(100, 260);
+          <!-- Voice fundamental frequency indicator for Zayin -->
+          <div id="voicingIndicator" class="mt-3 inline-flex items-center gap-1.5 text-xs text-purple-700 bg-purple-50 px-3 py-1 rounded-xl border border-purple-200">
+            <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
+            <span>רטט מיתרי קול (ז'): <strong id="f0ValueText">ללא זיהוי</strong></span>
+          </div>
+        </div>
+      </div>
 
-        // Band 2: Mid Sibilant (ש / SH) - Typically 2500 - 4500 Hz
-        const shEnergy = getBandEnergy(2400, 4600);
+      <!-- Live Spectral Centroid Gauge (The Core Acoustic Indicator) -->
+      <div class="bg-white/90 backdrop-blur-md rounded-3xl p-5 shadow-sm border border-slate-200/80">
+        <div class="flex items-center justify-between mb-2">
+          <h4 class="text-xs sm:text-sm font-bold text-slate-800 flex items-center gap-1.5">
+            <span>מרכז כובד ספקטרלי (Spectral Centroid)</span>
+            <span class="text-[11px] font-normal text-slate-400">2000Hz – 8500Hz</span>
+          </h4>
+          <span id="centroidHzValue" class="text-xs sm:text-sm font-mono font-bold bg-slate-100 text-slate-800 px-2 py-0.5 rounded-lg border border-slate-200">
+            0 Hz
+          </span>
+        </div>
 
-        // Band 3: High Sibilant (ס / S) - Typically 5500 - 8500 Hz
-        const sEnergy = getBandEnergy(5400, 8600);
+        <!-- Scale Bar with Color Zones -->
+        <div class="relative h-7 rounded-xl bg-slate-100 overflow-hidden flex border border-slate-300 shadow-inner">
+          <!-- SH Zone (2000Hz - 4300Hz) -->
+          <div class="h-full bg-indigo-200 text-indigo-900 text-[10px] font-bold flex items-center justify-center" style="width: 35%;">
+            ש' (אחורי)
+          </div>
+          <!-- Intermediate Zone (4300Hz - 5200Hz - Lisp / Transition) -->
+          <div class="h-full bg-amber-200 text-amber-900 text-[10px] font-bold flex items-center justify-center border-x border-amber-300" style="width: 17%;">
+            אזור ביניים
+          </div>
+          <!-- S Zone (5200Hz - 8500Hz) -->
+          <div class="h-full bg-emerald-200 text-emerald-900 text-[10px] font-bold flex items-center justify-center" style="width: 48%;">
+            ס' (קדמי חד)
+          </div>
 
-        // Normalize energy values to 0 - 100 percentages
-        const sScore = Math.min(100, Math.max(0, Math.round((sEnergy / 140) * 100)));
-        const shScore = Math.min(100, Math.max(0, Math.round((shEnergy / 140) * 100)));
-        // Z requires both high frication AND vocal fold vibration (f0)
-        const zRatio = Math.min(100, Math.max(0, Math.round(((sEnergy * 0.5 + f0Energy * 0.5) / 135) * 100)));
+          <!-- Needle / Indicator Pin -->
+          <div id="centroidNeedle" class="absolute top-0 bottom-0 w-1.5 bg-rose-600 rounded-full shadow-md needle-move pointer-events-none" style="left: 0%; transform: translateX(-50%); opacity: 0;"></div>
+        </div>
 
-        sMeter.style.width = `${sScore}%`;
-        shMeter.style.width = `${shScore}%`;
-        zMeter.style.width = `${zRatio}%`;
+        <!-- Scale Legend Hz Markers -->
+        <div class="flex justify-between text-[10px] font-mono text-slate-500 mt-1.5 px-1">
+          <span>2.0 kHz</span>
+          <span id="calibShMarker" class="text-indigo-700 font-semibold">ש: ~3.5kHz</span>
+          <span class="text-amber-700 font-semibold">סף ביניים (4.8k)</span>
+          <span id="calibSMarker" class="text-emerald-700 font-semibold">ס: ~6.2kHz</span>
+          <span>8.5 kHz</span>
+        </div>
+      </div>
 
-        sValText.textContent = `${sScore}%`;
-        shValText.textContent = `${shScore}%`;
-        zValText.textContent = `${zRatio}%`;
+    </section>
 
-        // Phonetic Classification Logic
-        evaluatePhoneme(sScore, shScore, zRatio, f0Energy);
-      }
+    <!-- RIGHT COLUMN: FFT Spectrum Canvas & Exercise Selection (5 cols) -->
+    <section class="lg:col-span-5 flex flex-col gap-5">
 
-      loop();
-    }
+      <!-- Real-Time Spectrum Canvas -->
+      <div class="bg-slate-900 rounded-3xl p-5 shadow-lg border border-slate-800 text-white flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h3 class="font-bold text-sm text-slate-200">ספקטרוגרם תדרי רעש החיכוך</h3>
+            <p class="text-[11px] text-slate-400">ניתוח FFT של 2048 ערוצים ללא הנחתת מיקרופון</p>
+          </div>
+          <span id="fricativePowerBadge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">עוצמה: שקט</span>
+        </div>
 
-    function evaluatePhoneme(sScore, shScore, zScore, f0) {
-      const ACTIVE_THRESHOLD = 32;
+        <div class="relative w-full h-44 rounded-2xl bg-slate-950 overflow-hidden border border-slate-800">
+          <canvas id="specCanvas" class="w-full h-full block"></canvas>
+          
+          <!-- Hz Guides -->
+          <div class="absolute bottom-1 inset-x-0 flex justify-between px-2 text-[9px] font-mono text-slate-500 pointer-events-none">
+            <span>0</span>
+            <span>2.5k (ש)</span>
+            <span>5.5k (ס)</span>
+            <span>9kHz</span>
+          </div>
+        </div>
 
-      // Detect which sound is dominant at this slice of speech
-      let dominant = null;
+        <div class="mt-3 flex items-center justify-around text-[11px] text-slate-400">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+            <span>ש' (2.5-4.3kHz)</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            <span>ס' (5.2-8kHz)</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+            <span>ז' (מיתרים)</span>
+          </div>
+        </div>
+      </div>
 
-      // Voiced fricative Z: high f0 resonance combined with fricative noise
-      if (f0 > 75 && (sScore > 35 || shScore > 35) && zScore > 40) {
-        dominant = 'Z';
-      } else if (sScore > ACTIVE_THRESHOLD && sScore > shScore * 1.15) {
-        dominant = 'S';
-      } else if (shScore > ACTIVE_THRESHOLD && shScore > sScore * 1.15) {
-        dominant = 'SH';
-      }
+      <!-- Quick Mode Exercises / Word Sets -->
+      <div class="bg-white/90 backdrop-blur-md rounded-3xl p-5 shadow-sm border border-slate-200/80 flex-1 flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="font-bold text-sm text-slate-800">רשימת מילים ומשפטים לאימון</h3>
+          <span class="text-[11px] text-indigo-600 font-semibold">לחץ לבחירה</span>
+        </div>
 
-      if (!dominant) {
-        detectedIndicator.textContent = "מזהה דיבור... הדגש את העיצור השורק";
-        return;
-      }
+        <div id="phraseListContainer" class="space-y-2 overflow-y-auto max-h-72 pr-1">
+          <!-- Populated by JavaScript -->
+        </div>
 
-      // Check alignment with current target
-      if (dominant === currentTarget) {
-        consecutiveCorrectFrames++;
-        consecutiveErrorFrames = 0;
+        <!-- Clinical Note -->
+        <div class="mt-auto pt-4 border-t border-slate-200/80 text-[11px] text-slate-500 leading-relaxed">
+          <strong class="text-slate-700">איך להצליח?</strong> אם ה-ס' מזוהה כאזור ביניים או ש', הלשון בורחת מעט קדימה או לצדדים. הצמד אותה חזק יותר לרצפת הפה והשיניים התחתונות.
+        </div>
+      </div>
 
-        detectedIndicator.textContent = `זוהה צליל מדויק: ${dominant === 'S' ? "ס'" : dominant === 'SH' ? "ש'" : "ז'"} ✅`;
+    </section>
 
-        if (consecutiveCorrectFrames > 6) {
-          // Success triggered
-          triggerSuccessFeedback();
-        }
-      } else {
-        consecutiveErrorFrames++;
-        consecutiveCorrectFrames = 0;
+  </main>
 
-        detectedIndicator.textContent = `נשמע כמו: ${dominant === 'S' ? "ס'" : dominant === 'SH' ? "ש'" : "ז'"} ⚠️`;
+  <!-- Personal Calibration Modal -->
+  <div id="calibModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 text-center animate-bounce-short">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center text-3xl mb-3 shadow-inner">
+        🎛️
+      </div>
 
-        if (consecutiveErrorFrames > 8) {
-          triggerCorrectiveFeedback(dominant);
-        }
-      }
-    }
+      <h3 class="text-xl font-black text-slate-900 mb-1">כיול מיקרופון אישי (2 שלבים קלים)</h3>
+      <p class="text-xs text-slate-500 mb-5">
+        לכל מיקרופון ומבנה פה יש תדר שונה. הכיול מאפשר התאמה מושלמת למכשיר שלך!
+      </p>
 
-    function triggerSuccessFeedback() {
-      if (currentTarget === 'S') {
-        setAvatarExpression(
-          'happy',
-          'כל הכבוד! ס\' חדה ומדויקת!',
-          'עוצמת האנרגיה התרכזה בתדרים הגבוהים (מעל 6kHz). זרימת האוויר הייתה ממוקדת בדיוק במרכז השיניים.'
-        );
-      } else if (currentTarget === 'SH') {
-        setAvatarExpression(
-          'happy',
-          'מצוין! ש\' עמוקה ורחבה!',
-          'הספקטרום הראה ריכוז תדרים מושלם באזור ה-3.5kHz עם חלל תהודה פתוח כהלכה.'
-        );
-      } else {
-        setAvatarExpression(
-          'happy',
-          'יופי של זִמזום! ז\' קולית וברורה!',
-          'זיהינו גם את חיכוך האוויר וגם את תדר היסוד של מיתרי הקול בו זמנית.'
-        );
-      }
-    }
+      <!-- Step 1: Hold SHHH -->
+      <div id="calibStep1" class="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 mb-3 text-right">
+        <div class="flex items-center justify-between mb-1">
+          <strong class="text-sm font-bold text-indigo-900">שלב 1: אמור "ששששששש"</strong>
+          <span id="step1Status" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-white text-indigo-700">ממתין</span>
+        </div>
+        <p class="text-xs text-indigo-800/80">הוצא צליל "ש" מתמשך ונקי למשך 2 שניות.</p>
+        <div class="w-full bg-indigo-200 h-2 rounded-full overflow-hidden mt-2">
+          <div id="step1Progress" class="bg-indigo-600 h-full w-0 transition-all duration-100"></div>
+        </div>
+      </div>
 
-    function triggerCorrectiveFeedback(detected) {
-      if (currentTarget === 'S' && detected === 'SH') {
-        setAvatarExpression(
-          'encourage',
-          'שמתי לב שה-ס\' נשמעה מעט כמו ש\'',
-          'קצה הלשון כנראה נסוג קצת אחורה. הצמד את קצה הלשון חזק יותר לחלק הפנימי של השיניים התחתונות וחייך מעט כדי לא לעגל שפתיים.'
-        );
-      } else if (currentTarget === 'SH' && detected === 'S') {
-        setAvatarExpression(
-          'encourage',
-          'ה-ש\' נשמעה מעט שורקת או חדה מדי',
-          'הלשון קרובה מדי לשיניים הקדמיות. משוך את גב הלשון מעט לאחור ועגל בעדינות את השפתיים בצורת משפך קטן.'
-        );
-      } else if (currentTarget === 'Z' && detected === 'S') {
-        setAvatarExpression(
-          'encourage',
-          'הגית ס\' במקום ז\' (חסרה קוליות)',
-          'מנח השיניים טוב, אך מיתרי הקול לא רטטו! נסה להשמיע קול כמו זבוב מזמזם: "זזזזזז" בזמן הפקת הצליל.'
-        );
-      } else {
-        setAvatarExpression(
-          'encourage',
-          'הצליל מעט מטושטש',
-          'ודא שאתה מוציא סילון אוויר רציף ולא קוטע את העיצור מוקדם מדי.'
-        );
-      }
-    }
+      <!-- Step 2: Hold SSSSS -->
+      <div id="calibStep2" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 mb-5 text-right opacity-60">
+        <div class="flex items-center justify-between mb-1">
+          <strong class="text-sm font-bold text-emerald-900">שלב 2: אמור "ססססססס"</strong>
+          <span id="step2Status" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-white text-emerald-700">ממתין</span>
+        </div>
+        <p class="text-xs text-emerald-800/80">הוצא צליל "ס" חד ושורק למשך 2 שניות.</p>
+        <div class="w-full bg-emerald-200 h-2 rounded-full overflow-hidden mt-2">
+          <div id="step2Progress" class="bg-emerald-600 h-full w-0 transition-all duration-100"></div>
+        </div>
+      </div>
 
-    function drawSpectrogram(dataArray, bufferLength, binWidth) {
-      const width = canvas.width;
-      const height = canvas.height;
-
-      canvasCtx.clearRect(0, 0, width, height);
-
-      // Draw subtle background grid
-      canvasCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-      canvasCtx.lineWidth = 1;
-      for (let y = 0; y < height; y += 30) {
-        canvasCtx.beginPath();
-        canvasCtx.moveTo(0, y);
-        canvasCtx.lineTo(width, y);
-        canvasCtx.stroke();
-      }
-
-      // Display up to 10 kHz (most relevant region for sibilants)
-      const maxDisplayFreq = 10000;
-      const maxBin = Math.min(bufferLength, Math.floor(maxDisplayFreq / binWidth));
-      const barWidth = (width / maxBin) * 1.5;
-      let x = 0;
-
-      for (let i = 0; i < maxBin; i++) {
-        const val = dataArray[i];
-        const barHeight = (val / 255) * height;
-        const currentFreq = i * binWidth;
-
-        // Color coding depending on frequency zone
-        if (currentFreq < 500) {
-          // Voicing zone (Z)
-          canvasCtx.fillStyle = `rgba(168, 85, 247, ${Math.max(0.3, val / 255)})`;
-        } else if (currentFreq >= 2400 && currentFreq <= 4800) {
-          // SH zone
-          canvasCtx.fillStyle = `rgba(99, 102, 241, ${Math.max(0.4, val / 255)})`;
-        } else if (currentFreq >= 5200 && currentFreq <= 8800) {
-          // S zone
-          canvasCtx.fillStyle = `rgba(16, 185, 129, ${Math.max(0.5, val / 255)})`;
-        } else {
-          // Neutral ambient
-          canvasCtx.fillStyle = `rgba(148, 163, 184, ${Math.max(0.2, val / 255 * 0.5)})`;
-        }
-
-        canvasCtx.fillRect(width - x - barWidth, height - barHeight, barWidth - 1, barHeight);
-        x += barWidth;
-      }
-    }
-
-    calibrateBtn.addEventListener('click', () => {
-      if (!isListening) {
-        showModal('הפעל קודם את המיקרופון', 'יש להפעיל את המיקרופון לפני ביצוע כיול רעש הסביבה.');
-        return;
-      }
-
-      calibrateLabel.textContent = "מכייל רעש (2 שנ')...";
-      calibrateBtn.classList.add('bg-amber-100', 'border-amber-300');
-
-      let samples = [];
-      const startTime = Date.now();
-      const testBuffer = new Uint8Array(analyser.frequencyBinCount);
-
-      const calInterval = setInterval(() => {
-        analyser.getByteFrequencyData(testBuffer);
-        let sum = 0;
-        for (let i = 0; i < testBuffer.length; i++) sum += testBuffer[i];
-        samples.push(sum / testBuffer.length);
-
-        if (Date.now() - startTime >= 2000) {
-          clearInterval(calInterval);
-          const avgNoise = samples.reduce((a, b) => a + b, 0) / samples.length;
-          noiseFloor = Math.max(12, Math.round(avgNoise + 5)); // Set threshold slightly above background
-          calibrateLabel.textContent = "כיול הושלם";
-          noiseLevelLabel.textContent = `רעש כויל לסף: ${noiseFloor} dB`;
-          setTimeout(() => {
-            calibrateLabel.textContent = "כיול רעש";
-            calibrateBtn.classList.remove('bg-amber-100', 'border-amber-300');
-          }, 2500);
-        }
-      }, 50);
-    });
-
-    /* Toggle Microphone Button */
-    toggleMicBtn.addEventListener('click', () => {
-      if (!isListening) {
-        initAudioEngine();
-      } else {
-        stopAudioEngine();
-      }
-    });
-
-    /* Modal Utility */
-    const customModal = document.getElementById('customModal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDesc = document.getElementById('modalDesc');
-    const modalCloseBtn = document.getElementById('modalCloseBtn');
-
-    function showModal(title, message) {
-      modalTitle.textContent = title;
-      modalDesc.textContent = message;
-      customModal.classList.remove('hidden');
-    }
-
-    modalCloseBtn.addEventListener('click', () => {
-      customModal.classList.add('hidden');
-    });
-
-    /* Initialize Default View */
-    updateExerciseView();
-    setAvatarExpression('neutral', 'ברוכים הבאים ל-סְפִּיקִי!', 'לחץ על "הפעל מיקרופון" והתחל לתרגל הגייה שורקת נכונה.');
-  </script>
-</body>
-</html>
+      <div class="flex gap-2">
+        <button id="startCalibWizardBtn" class="flex-1 py-3 rounded-xl bg-indigo-600
